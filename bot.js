@@ -13,7 +13,7 @@ const Discord = require("discord.js");
 const config = require("./config.json");
 const fs = require("fs");
 //const sql = require("sqlite");
-sql.open("./score.sqlite")
+sql.open("./scores.sqlite")
 const client = new Discord.Client({disableEveryone: true});
 client.commands = new Discord.Collection();
 
@@ -40,12 +40,8 @@ client.on("ready", () => {
   console.log("Bandit Watcher has been enabled!");
   console.log(client.commands);
   client.user.setActivity('Development 1.1.9.1 BETA');
-
-});
-
-client.on("message", async message => {
-	///////// Check if the table "points" exists.
-  const table = sql.prepare("SELECT count(*) FROM sqlite_master WHERE type='table' AND name = 'scores';").get();
+	
+	const table = sql.prepare("SELECT count(*) FROM sqlite_master WHERE type='table' AND name = 'scores';").get();
   if (!table['count(*)']) {
     // If the table isn't there, create it and setup the database correctly.
     sql.prepare("CREATE TABLE scores (id TEXT PRIMARY KEY, user TEXT, guild TEXT, points INTEGER, level INTEGER);").run();
@@ -54,20 +50,37 @@ client.on("message", async message => {
     sql.pragma("synchronous = 1");
     sql.pragma("journal_mode = wal");
   }
-client.config = require("./config.js");
+ 
+  // And then we have two prepared statements to get and set the score data.
+  client.getScore = sql.prepare("SELECT * FROM scores WHERE user = ? AND guild = ?");
+  client.setScore = sql.prepare("INSERT OR REPLACE INTO scores (id, user, guild, points, level) VALUES (@id, @user, @guild, @points, @level);");
+});
 
-client.logger = require("./modules/Logger");
-
-require("./modules/functions.js")(client);
-client.getScore = sql.prepare("SELECT * FROM scores WHERE user = ? AND guild = ?");
-client.setScore = sql.prepare("INSERT OR REPLACE INTO scores (id, user, guild, points, level) VALUES (@id, @user, @guild, @points, @level);");
-client.commands = new Enmap();
-client.aliases = new Enmap();
-
-client.settings = new Enmap({name: "settings"});
-client.API = new Idiot.Client(client.config.IAPIToken, { dev: true });
-client.queue = new Enmap();
-client.top10 = sql.prepare("SELECT * FROM scores WHERE guild = ? ORDER BY points DESC LIMIT 10;");
+client.on("message", message => {
+  if (message.author.bot) return;
+  let score;
+  if (message.guild) {
+    score = client.getScore.get(message.author.id, message.guild.id);
+    if (!score) {
+      score = { id: `${message.guild.id}-${message.author.id}`, user: message.author.id, guild: message.guild.id, points: 0, level: 1 }
+    }
+    score.points++;
+    const curLevel = Math.floor(0.1 * Math.sqrt(score.points));
+    if(score.level < curLevel) {
+      score.level++;
+      message.reply(`You've leveled up to level **${curLevel}**! Ain't that dandy?`);
+    }
+    client.setScore.run(score);
+  }
+  if (message.content.indexOf(config.prefix) !== 0) return;
+ 
+  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+  const command = args.shift().toLowerCase();
+ 
+  // Command-specific code here!
+	if(command === "points") {
+  return message.reply(`You currently have ${score.points} points and are level ${score.level}!`);
+}
 
 /*
 	  if (message.author.bot) return;

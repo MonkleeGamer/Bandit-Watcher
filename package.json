@@ -9,6 +9,10 @@
   "author": "ItzMonklee",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^11.3.2"
+    "discord.js": "^11.3.2",
+    "express":"*",
+    "body-parser":"*",
+    "bcrypt": "^0.8.5"
+
   }
 }

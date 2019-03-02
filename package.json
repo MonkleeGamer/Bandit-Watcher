@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/An-Idiots-Guide/guidebot.git"
+    "url": "git+https://github.com/MonkleeGamer/Bandit-Watcher.git"
   },
-  "author": "The Idiot's Guide Community",
-  "license": "MIT",
+  "author": "ItzMonklee",
+  "license": "BJB",
   "bugs": {
-    "url": "https://github.com/An-Idiots-Guide/guidebot/issues"
+    "url": "https://github.com/MonkleeGamer/Bandit-Watcher.git"
   },
-  "homepage": "https://github.com/An-Idiots-Guide/guidebot#readme",
+  "homepage": "https://github.com/MonkleeGamer/Bandit-Watcher#readme",
   "dependencies": {
     "discord.js": "^11.2.1",
     "enmap": "^0.3.2",

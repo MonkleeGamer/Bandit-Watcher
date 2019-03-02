@@ -1,16 +1,7 @@
 const http = require('http');
 const express = require('express');
 const app = express();
-app.get("/", (request, response) => {
-  console.log(Date.now() + " Ping Received");
-  response.sendStatus(200);
-});
-app.listen(process.env.PORT);
-setInterval(() => {
-  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
-}, 280000);
-
-var logo = "https://discord.gg/Z7hBfWQ"; //the logo
+go = "https://discord.gg/Z7hBfWQ"; //the logo
 var footer = "Bandit Watcher"; //the name of bot for footer
 
 const Discord = require("discord.js");
@@ -20,6 +11,33 @@ const sql = require("sqlite");
 sql.open("./score.sqlite")
 const client = new Discord.Client({disableEveryone: true});
 client.commands = new Discord.Collection();
+
+///////// Check if the table "points" exists.
+  const table = sql.prepare("SELECT count(*) FROM sqlite_master WHERE type='table' AND name = 'scores';").get();
+  if (!table['count(*)']) {
+    // If the table isn't there, create it and setup the database correctly.
+    sql.prepare("CREATE TABLE scores (id TEXT PRIMARY KEY, user TEXT, guild TEXT, points INTEGER, level INTEGER);").run();
+    // Ensure that the "id" row is always unique and indexed.
+    sql.prepare("CREATE UNIQUE INDEX idx_scores_id ON scores (id);").run();
+    sql.pragma("synchronous = 1");
+    sql.pragma("journal_mode = wal");
+  }
+client.config = require("./config.js");
+
+client.logger = require("./modules/Logger");
+
+require("./modules/functions.js")(client);
+client.getScore = sql.prepare("SELECT * FROM scores WHERE user = ? AND guild = ?");
+client.setScore = sql.prepare("INSERT OR REPLACE INTO scores (id, user, guild, points, level) VALUES (@id, @user, @guild, @points, @level);");
+client.commands = new Enmap();
+client.aliases = new Enmap();
+
+client.settings = new Enmap({name: "settings"});
+client.API = new Idiot.Client(client.config.IAPIToken, { dev: true });
+client.queue = new Enmap();
+client.top10 = sql.prepare("SELECT * FROM scores WHERE guild = ? ORDER BY points DESC LIMIT 10;");
+
+////////
 
 fs.readdir("./commands/", (err, files) => {
 
@@ -47,7 +65,7 @@ client.on("ready", () => {
 });
 
 client.on("message", async message => {
-
+/*
 	  if (message.author.bot) return;
   	if (message.channel.type === "dm") return; //ignores DM channels
     let prefix = config.prefix;
@@ -83,7 +101,7 @@ client.on("message", async message => {
         sql.run("INSERT INTO scores (userId, points, level) VALUES (?, ?, ?)", [message.author.id, 1, 0]);
       });
     });
-
+*/
 	if(message.content.startsWith(config.prefix + "prefix")) { //checks for prefix
 
 		//used for saving config of prefix

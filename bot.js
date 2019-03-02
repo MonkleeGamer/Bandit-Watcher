@@ -1,80 +1,31 @@
-const http = require('http');
-const express = require('express');
-const app = express();
-
-var logo = "https://discord.gg/Z7hBfWQ"; //the logo
-var footer = "Bandit Watcher"; //the name of bot for footer
-
 const Discord = require("discord.js");
 const config = require("./config.json");
 const fs = require("fs");
+
 const sql = require("sqlite");
 sql.open("./score.sqlite")
-const client = new Discord.Client({disableEveryone: true});
-client.commands = new Discord.Collection();
 
-fs.readdir("./commands/", (err, files) => {
+var logo = "https://i.imgur.com/61p72Ru.png"; //the logo
+const bot = new Discord.Client({disableEveryone: true});
 
-  if (err) console.log(err);
-
-  let jsfile = files.filter(f => f.split(".").pop() === "js")
-  if(jsfile.length <= 0){
-    console.log("Could not find commands!");
-    return;
-  }
-
-  jsfile.forEach((f, i) =>{
-    let props = require(`./commands/${f}`);
-    console.log(`${f} loaded!`);
-    client.commands.set(props.help.name, props);
-  });
+bot.on("ready", () => {
+  console.log("Bandit Watcher has been Enabled!");
+  console.log(bot.commands);
+  bot.user.setActivity('In development - v1.1.9.1');
 });
 
-
-client.on("ready", () => {
-  console.log("Bandit Watcher has been enabled!");
-  console.log(client.commands);
-  client.user.setActivity('Development 1.1.9.1 BETA');
-
-});
-
-client.on("message", async message => {
+bot.on("message", async message => {
 
 	  if (message.author.bot) return;
-  	if (message.channel.type === "dm") return; //ignores DM channels
-    let prefix = config.prefix;
-    let messageArray = message.content.split(" ");
-    let cmd = messageArray[0];
+	  if (message.content.indexOf(config.prefix) !== 0) return;
 
-   // if (message.content.indexOf(config.prefix) !== 0) return;
+	  const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
+	  const command = args.shift().toLowerCase();
 
-    // This is the best way to define args. Trust me.
-    const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
 
-    if (!message.content.startsWith(config.prefix));
+	if (message.author.bot) return; //ignore other bots
+	if (message.channel.type === "dm") return; //ignores DM channels
 
-    let commandfile = client.commands.get(cmd.slice(prefix.length));
-    if(commandfile) commandfile.run(client,message,args);
-
-    sql.get(`SELECT * FROM scores WHERE userId ="${message.author.id}"`).then(row => {
-      if (!row) {
-        sql.run("INSERT INTO scores (userId, points, level) VALUES (?, ?, ?)", [message.author.id, 1, 0]);
-      } else {
-        let curLevel = Math.floor(0.35 * Math.sqrt(row.points + 1));
-        if (curLevel > row.level) {
-          row.level = curLevel;
-          sql.run(`UPDATE scores SET points = ${row.points + 1}, level = ${row.level} WHERE userId = ${message.author.id}`);
-          message.reply(`You've leveled up to level **${curLevel}**!`);
-        }
-        sql.run(`UPDATE scores SET points = ${row.points + 1} WHERE userId = ${message.author.id}`);
-      }
-    }).catch(() => {
-      console.error;
-      sql.run("CREATE TABLE IF NOT EXISTS scores (userId TEXT, points INTEGER, level INTEGER)").then(() => {
-        sql.run("INSERT INTO scores (userId, points, level) VALUES (?, ?, ?)", [message.author.id, 1, 0]);
-      });
-    });
 
 	if(message.content.startsWith(config.prefix + "prefix")) { //checks for prefix
 
@@ -84,13 +35,31 @@ client.on("message", async message => {
 	  fs.writeFile("./config.json", JSON.stringify(config), (err) => console.error);
 
 	  // used for confirming the success of prefix change
-	  console.log("The prefix has been changed to '" + config.prefix + "'");
 	  message.channel.send("The prefix has been changed to ''" + config.prefix + "''")
-
-	  //checks for perms of owner
-	  if(message.author.id !== config.ownerID) return;
 	  }
 
-});
+    if (command === "info") {
+  	  const embed = new Discord.RichEmbed()
+  	    .setTitle("Welcome to Bandit Watcher")
+  	    .setAuthor("Offical Sharp Resistance Bot!", `${logo}`)
+  	    /*
+  	     * Alternatively, use "#00AE86", [0, 174, 134] or an integer number.
+  	     */
+  	    .setColor(0xFFFF00)
+  	    .setDescription("The offical discord of the Sharp Resistance Community!")
+  	    .setThumbnail(`${logo}`)
+  	    /*
+  	     * Takes a Date object, defaults to current date.
+  	     */
+  	    .setTimestamp()
+        .setFooter("Sharp Resistance Bot", `${logo}`)
+  	    .setURL("https://discord.gg/nFmNae8")
+  	    .addField("What is Sharp Resistance?",
+  	      "Sharp Resistance is a Community Clan that is based on Epic Games' Fortnite, Save The World and Battle Royale! This community and clan is for people on All Platforms to come together and Play!")
 
-client.login(process.env.TOKEN);
+  	    message.channel.send({embed});
+
+
+  	  }
+    });
+bot.login(process.env.token);

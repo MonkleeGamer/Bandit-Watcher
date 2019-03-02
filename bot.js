@@ -6,7 +6,7 @@ const Enmap = require("enmap");
 const SQLite = require("better-sqlite3");
 const sql = new SQLite('./data/scores.sqlite');
 
-var = "https://discord.gg/Z7hBfWQ"; //the logo
+var go = "https://discord.gg/Z7hBfWQ"; //the logo
 var footer = "Bandit Watcher"; //the name of bot for footer
 
 const Discord = require("discord.js");

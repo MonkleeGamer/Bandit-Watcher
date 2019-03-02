@@ -42,7 +42,7 @@ fs.readdir("./commands/", (err, files) => {
 client.on("ready", () => {
   console.log("Bandit Watcher has been enabled!");
   console.log(client.commands);
-  client.user.setActivity('Development 1.1.9.1 BETA');
+  client.user.setActivity('Development 1.1.9 BETA');
 
 });
 

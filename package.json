@@ -1,7 +1,7 @@
 {
-  "name": "guidebot",
-  "version": "2.0.3",
-  "description": "A boilerplate example bot with command handler and reloadable commands. Updated and Maintained by the Idiot's Guide Community",
+  "name": "Bandit Watcger",
+  "version": "2.0.0",
+  "description": "Bot for Bandit Barney's Discord Server",
   "main": "node bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
